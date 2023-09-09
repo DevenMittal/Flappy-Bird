@@ -49,7 +49,7 @@ namespace Flappy_Bird
 
         protected override void Initialize()
         {
-
+            //hi
             // TODO: Add your initialization logic here
             rand = new Random();
             timespan= new TimeSpan();
