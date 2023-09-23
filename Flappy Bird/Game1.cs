@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Flappy_Bird
 {
-    
+
     public class Game1 : Game
     {
         private GraphicsDeviceManager graphics;
@@ -23,10 +23,10 @@ namespace Flappy_Bird
         List<Obstacle> obstacles;
 
         TimeSpan timespan;
-        bool Lose = false;
+        bool restart = false;
         int score;
-       
-        
+        GeneticAlgorithm geneticLearning;
+
         int[] neuronsPerLayer;
 
         Func<double, double> functionTan;
@@ -36,8 +36,8 @@ namespace Flappy_Bird
 
         ActivationFunction activationFunction;
         ErrorFunction errorFunction;
-        
-        (Bird bird, double fitness)[] birds;
+
+        Bird[] birds;
 
         NeuralNetwork network;
         public Game1()
@@ -52,8 +52,10 @@ namespace Flappy_Bird
             //hi
             // TODO: Add your initialization logic here
             rand = new Random();
-            timespan= new TimeSpan();
+            timespan = new TimeSpan();
             score = 0;
+
+            geneticLearning = new GeneticAlgorithm();
 
             birdPosition = new Vector2(100, 100);
             birdSpeed = new Vector2(5, 5);
@@ -69,7 +71,7 @@ namespace Flappy_Bird
             errorFunctionDerivative = (input, desired) => -2 * (desired - input);
 
             activationFunction = new ActivationFunction(functionTan, derivativeTan);
-            errorFunction = new ErrorFunction(errorFunc, errorFunctionDerivative); 
+            errorFunction = new ErrorFunction(errorFunc, errorFunctionDerivative);
             neuronsPerLayer = new int[] { 2, 4, 1 };
 
             network = new NeuralNetwork(activationFunction, errorFunction, neuronsPerLayer);
@@ -86,11 +88,11 @@ namespace Flappy_Bird
 
             obstacles.Add(new Obstacle(topPipe, bottomPipe));
 
-            birds = new (Bird net, double fitness)[10];
+            birds = new Bird[100];
             for (int i = 0; i < birds.Length; i++)
             {
                 NeuralNetwork net = new NeuralNetwork(activationFunction, errorFunction, neuronsPerLayer);
-                birds[i] = (new Bird(net, new Vector2(100, 100), pixel, Color.Yellow, birdPosition, birdHitbox), fitness);
+                birds[i] = (new Bird(net, new Vector2(100, 100), pixel, Color.Yellow, birdPosition, birdHitbox));
             }
 
 
@@ -109,40 +111,83 @@ namespace Flappy_Bird
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-            if (Lose == false)
+            //if (Lose == false)
+            //{
+            this.Window.Title = $"{Mouse.GetState().Position}                    {score}";
+            timespan += gameTime.ElapsedGameTime;
+
+            for (int i = 0; i < obstacles.Count; i++)
             {
-                this.Window.Title = $"{Mouse.GetState().Position}                    {score}";
-                timespan += gameTime.ElapsedGameTime;
+                obstacles[i].Update();
 
-                for (int i = 0; i < obstacles.Count; i++)
+                if (obstacles[i].Top.hitbox.X + 60 < 0)
                 {
-                    obstacles[i].Update();
+                    obstacles.RemoveAt(i);
+                    score++;
+                }
+                if (timespan.Seconds > 1.5)
+                {
+                    int pastX = 800/*(int)obstacles[obstacles.Count-1].Bottom.position.X + 100*/;
+                    Rectangle pipeRectangle1 = new Rectangle(pastX, rand.Next(-150, 0), 50, 250);
+                    Rectangle pipeRectangle2 = new Rectangle(pastX, pipeRectangle1.Y + pipeRectangle1.Height + 200, 50, 300);
+                    Pipe topPipe = new Pipe(pixel, pipeRectangle1, Color.Green);
+                    Pipe bottomPipe = new Pipe(pixel, pipeRectangle2, Color.Green);
 
-                    if (obstacles[i].Top.hitbox.X + 60 < 0)
-                    {
-                        obstacles.RemoveAt(i);
-                        score++;
-                    }
-                    if (timespan.Seconds > 1.5)
-                    {
-                        int pastX = 800/*(int)obstacles[obstacles.Count-1].Bottom.position.X + 100*/;
-                        Rectangle pipeRectangle1 = new Rectangle(pastX, rand.Next(-150, 0), 50, 250);
-                        Rectangle pipeRectangle2 = new Rectangle(pastX, pipeRectangle1.Y + pipeRectangle1.Height + 200, 50, 300);
-                        Pipe topPipe = new Pipe(pixel, pipeRectangle1, Color.Green);
-                        Pipe bottomPipe = new Pipe(pixel, pipeRectangle2, Color.Green);
+                    obstacles.Add(new Obstacle(topPipe, bottomPipe));
+                    timespan = TimeSpan.Zero;
+                }
+            }
 
-                        obstacles.Add(new Obstacle(topPipe, bottomPipe));
-                        timespan = TimeSpan.Zero;                        
-                    }
+            geneticLearning.TrainGeneticLearning(birds, new Random(), 0.01);
+            
+            
+            for (int i = 0; i < birds.Length; i++)
+            {
+                if (birds[i].Collision(obstacles))
+                {
+                    birds[i].isDead = true;
+                }
+                birds[i].Update(obstacles);
+            }
+
+            //Lose = Flappy.Collision(obstacles);
+            // Flappy.Update();
+            restart = true;
+            for (int i = 0; i < birds.Length; i++)
+            {
+                if (birds[i].isDead == false)
+                {
+                    restart= false;
                 }
 
-                
-
-                Lose = Flappy.Collision(obstacles);
-                Flappy.Update();
-
-                base.Update(gameTime);
             }
+
+            if (restart)
+            {
+                for (int i = 0; i < birds.Length; i++)
+                {
+                    birds[i].hitbox = new Rectangle((int)birdPosition.X, (int)birdPosition.Y, 50, 50);
+                    birds[i].isDead = false;
+                }
+                restart = false;
+                obstacles.Clear();
+                obstacles = new List<Obstacle>();
+                int pastX = 800/*(int)obstacles[obstacles.Count-1].Bottom.position.X + 100*/;
+
+                Rectangle pipeRectangle1 = new Rectangle(pastX, rand.Next(-150, 0), 50, 250);
+                Rectangle pipeRectangle2 = new Rectangle(pastX, pipeRectangle1.Y + pipeRectangle1.Height + 200, 50, 300);
+                Pipe topPipe = new Pipe(pixel, pipeRectangle1, Color.Green);
+                Pipe bottomPipe = new Pipe(pixel, pipeRectangle2, Color.Green);
+
+                obstacles.Add(new Obstacle(topPipe, bottomPipe));
+                timespan = new TimeSpan();
+                score = 0;
+            }
+
+           
+
+            base.Update(gameTime);
+            // }
 
         }
 
@@ -152,7 +197,11 @@ namespace Flappy_Bird
 
             spriteBatch.Begin();
 
-            Flappy.Draw(spriteBatch);
+           // Flappy.Draw(spriteBatch);
+            for (int i = 0; i < birds.Length; i++)
+            {
+                birds[i].Draw(spriteBatch);
+            }
             for (int i = 0; i < obstacles.Count; i++)
             {
                 obstacles[i].Draw(spriteBatch);

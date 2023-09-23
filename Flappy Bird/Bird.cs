@@ -14,11 +14,12 @@ namespace Flappy_Bird
         public Rectangle hitbox;
         public Vector2 origin => new Vector2(hitbox.Width / 2, hitbox.Height / 2);
 
-        const float gravVal = 12 ;
+        const float gravVal = 12;
         const float gravity = 0.7f;
         bool isJumping = false;
         public NeuralNetwork brain;
         int fitness;
+        public bool isDead;
 
         public Bird(NeuralNetwork brain, Vector2 speed, Texture2D image, Color tint, Vector2 position, Rectangle hitbox)
         {
@@ -28,20 +29,48 @@ namespace Flappy_Bird
             this.position = position;
             this.hitbox = hitbox;
             this.brain = brain;
+            isDead = false;
         }
-        
-        public void Update()
+
+        public void Update(List<Obstacle> obstacles)
         {
-            hitbox.Y += 3;
-            if (Keyboard.GetState().IsKeyDown(Keys.Space) && isJumping == false)
+            if (isDead == false)
             {
-                //add lerp
-                hitbox.Y -= 60;
-                isJumping= true;
-            }
-            if (Keyboard.GetState().IsKeyUp(Keys.Space) && isJumping == true)
-            {
-                isJumping= false;   
+
+
+                hitbox.Y += 3;
+                //if (Keyboard.GetState().IsKeyDown(Keys.Space) && isJumping == false)
+                float XDistance = 0f;
+                float YDistance = 0f;
+                for (int i = 0; i < obstacles.Count; i++)
+                {
+                    if (obstacles[i].Top.hitbox.X > hitbox.X)
+                    {
+                        XDistance = obstacles[i].Top.hitbox.X - hitbox.X;
+                        YDistance = obstacles[i].Top.hitbox.Y + obstacles[i].Top.hitbox.Height+70 - hitbox.Y;
+                        break;
+                    }
+                }
+
+                if (isJumping == false && brain.Compute(new double[] { (double)XDistance, (double)YDistance })[0] > .5)
+                {
+                    //add lerp
+                    if (hitbox.Y - 60 < 0)
+                    {
+                        hitbox.Y = 0;
+                    }
+                    else
+                    {
+                        hitbox.Y -= 60;
+                    }
+                    isJumping = true;
+                }
+                //if (Keyboard.GetState().IsKeyUp(Keys.Space) && isJumping == true)
+
+                if (isJumping == true)
+                {
+                    isJumping = false;
+                }
             }
             ///hitbox = new Rectangle((int)position.X, (int)position.Y, hitbox.Width, hitbox.Height);
         }
@@ -59,13 +88,24 @@ namespace Flappy_Bird
                     return true;
                 }
             }
+            //if (hitbox.Y + hitbox.Height < 0)
+            //{
+            //    return true;
+            //}
+            if (hitbox.Y > 480)
+            {
+                return true;
+            }
             return false;
         }
-        
+
 
         public void Draw(SpriteBatch sb)
         {
-            sb.Draw(image, hitbox, tint);
+            if (!isDead)
+            {
+                sb.Draw(image, hitbox, tint);
+            }
         }
     }
 }

@@ -81,24 +81,24 @@ namespace Flappy_Bird
             }
         }
 
-        public void TrainGeneticLearning((NeuralNetwork net, double fitness)[] population, Random random, double mutationRate)
+        public void TrainGeneticLearning(Bird[] birds, Random random, double mutationRate)
         {
-            Array.Sort(population, (a, b) => a.fitness.CompareTo(b.fitness));
+            Array.Sort(birds, (a, b) => a.position.X.CompareTo(b.position.X));
             //population =  population.OrderByDescending((p) => p.fitness).ToArray();
-            int start = (int)(population.Length * 0.1);
-            int end = (int)(population.Length * 0.9);
+            int start = (int)(birds.Length * 0.1);
+            int end = (int)(birds.Length * 0.9);
 
             //Notice that this process is only called on networks in the middle 80% of the array
             for (int i = start; i < end; i++)
             {
-                Crossover(population[random.Next(start)].net, population[i].net, random);
-                Mutate(population[i].net, random, mutationRate);
+                Crossover(birds[random.Next(start)].brain, birds[i].brain, random);
+                Mutate(birds[i].brain, random, mutationRate);
             }
 
             //Removes the worst performing networks
-            for (int i = end; i < population.Length; i++)
+            for (int i = end; i < birds.Length; i++)
             {
-                population[i].net.Randomize(random, -1.0, 1.0);
+                birds[i].brain.Randomize(random, -1.0, 1.0);
             }
         }
 
