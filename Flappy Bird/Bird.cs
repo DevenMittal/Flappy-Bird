@@ -52,16 +52,16 @@ namespace Flappy_Bird
                     }
                 }
 
-                if (isJumping == false && brain.Compute(new double[] { (double)XDistance, (double)YDistance })[0] > .5)
+                if (isJumping == false && brain.Compute(new double[] { (double)XDistance, (double)YDistance })[0] > .8)
                 {
                     //add lerp
-                    if (hitbox.Y - 60 < 0)
+                    if (hitbox.Y - 30 < 0)
                     {
                         hitbox.Y = 0;
                     }
                     else
                     {
-                        hitbox.Y -= 60;
+                        hitbox.Y -= 30;
                     }
                     isJumping = true;
                 }

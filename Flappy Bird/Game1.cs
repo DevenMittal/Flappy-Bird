@@ -88,7 +88,7 @@ namespace Flappy_Bird
 
             obstacles.Add(new Obstacle(topPipe, bottomPipe));
 
-            birds = new Bird[100];
+            birds = new Bird[200];
             for (int i = 0; i < birds.Length; i++)
             {
                 NeuralNetwork net = new NeuralNetwork(activationFunction, errorFunction, neuronsPerLayer);
@@ -138,7 +138,7 @@ namespace Flappy_Bird
                 }
             }
 
-            geneticLearning.TrainGeneticLearning(birds, new Random(), 0.01);
+            geneticLearning.TrainGeneticLearning(birds, new Random(), 0.002);
             
             
             for (int i = 0; i < birds.Length; i++)
