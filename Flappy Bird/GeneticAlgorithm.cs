@@ -78,16 +78,13 @@ namespace Flappy_Bird
         public void TrainGeneticLearning(Bird[] birds, Random random, double mutationRate)
         {
             Array.Sort(birds, (a, b) => b.fitness.CompareTo(a.fitness));
-            int eliteCount = Math.Max(2, (int)(birds.Length * 0.1));
+            int eliteCount = 1;
 
-            //Keep the elites, then make every other bird from two distinct elite parents.
+            //Keep the farthest bird, then make every other bird from that elite parent.
             for (int i = eliteCount; i < birds.Length; i++)
             {
                 int firstParentIndex = random.Next(eliteCount);
-                int secondParentIndex = random.Next(eliteCount - 1);
-                if (secondParentIndex >= firstParentIndex) secondParentIndex++;
-
-                Crossover(birds[firstParentIndex].brain, birds[secondParentIndex].brain, birds[i].brain, random);
+                Crossover(birds[firstParentIndex].brain, birds[firstParentIndex].brain, birds[i].brain, random);
                 Mutate(birds[i].brain, random, mutationRate);
             }
         }

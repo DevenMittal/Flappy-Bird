@@ -1,6 +1,6 @@
 # Flappy Bird AI
 
-I built a Flappy Bird simulation in C# with a small neural network for each bird and a genetic-learning experiment. The game renders 20 birds at once, so I can watch their decisions against the same moving obstacles.
+I built a Flappy Bird simulation in C# with a small neural network for each bird and a genetic-learning experiment. The game renders 5 birds at once, so I can watch their decisions against the same moving obstacles.
 
 ## Current recording
 
@@ -23,9 +23,9 @@ These are the recordings already included in this repository. They are historica
 
 ## Evolution loop
 
-Each bird receives one fitness point for every update it survives. When all 20 birds have died, the population is sorted by that survival score. The top two remain. Every other bird receives a weight-by-weight crossover of those two parent networks and then uses the existing mutation operation. The next generation starts from the same initial obstacle setup.
+Each bird receives one fitness point for every update it survives. When all 5 birds have died, the population is sorted by that survival score. The farthest bird remains. Every other bird receives a weight-by-weight copy from that elite network and then uses the existing mutation operation. The next generation starts from the same initial obstacle setup.
 
-The initial population is randomized through one shared generator, so every bird receives a distinct initial network. The window title shows the current generation, the best survival score from the completed generation, and the current score. This makes it possible to inspect each generation without changing the network or obstacle model.
+The initial population is randomized through one shared generator, so every bird receives a distinct initial network. The window title shows the current generation, the best survival score from the completed generation, and the current score. This makes it possible to inspect the elite's progress without changing the network or obstacle model.
 
 ```mermaid
 flowchart LR

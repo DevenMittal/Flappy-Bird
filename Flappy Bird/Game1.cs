@@ -40,7 +40,7 @@ namespace Flappy_Bird
         ErrorFunction errorFunction;
 
         Bird[] birds;
-        const int PopulationSize = 20;
+        const int PopulationSize = 5;
 
         NeuralNetwork network;
         public Game1()
