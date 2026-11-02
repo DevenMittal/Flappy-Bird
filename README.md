@@ -2,13 +2,17 @@
 
 I built a Flappy Bird simulation in C# with a small neural network for each bird and a genetic-learning experiment. The game renders 20 birds at once, so I can watch their decisions against the same moving obstacles.
 
-## Demo
+## Current recording
+
+A new recording still needs to be captured from the revised generation loop. It will begin at visible generation 1 and show the evolution metrics in the window title.
+
+## Historical recordings
 
 https://github.com/user-attachments/assets/41f2ebf1-8cd5-4da5-b441-255af583a9ff
 
 https://github.com/user-attachments/assets/570e88b6-70c0-4a76-96ff-d5079147f44f
 
-These are the recordings already included in this repository. They are historical demos, not a new benchmark of the current checkout.
+These are the recordings already included in this repository. They are historical demos and do not reflect the current generation loop or the 20-bird population.
 
 ## Inside the project
 
@@ -21,7 +25,7 @@ These are the recordings already included in this repository. They are historica
 
 Each bird receives one fitness point for every update it survives. When all 20 birds have died, the population is sorted by that survival score. The top two remain. Every other bird receives a weight-by-weight crossover of those two parent networks and then uses the existing mutation operation. The next generation starts from the same initial obstacle setup.
 
-The window title shows the current generation, the best survival score from the completed generation, and the current score. This makes it possible to inspect each generation without changing the network or obstacle model.
+The initial population is randomized through one shared generator, so every bird receives a distinct initial network. The window title shows the current generation, the best survival score from the completed generation, and the current score. This makes it possible to inspect each generation without changing the network or obstacle model.
 
 ```mermaid
 flowchart LR

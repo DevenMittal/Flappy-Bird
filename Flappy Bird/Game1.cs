@@ -95,6 +95,7 @@ namespace Flappy_Bird
             for (int i = 0; i < birds.Length; i++)
             {
                 NeuralNetwork net = new NeuralNetwork(activationFunction, errorFunction, neuronsPerLayer);
+                net.Randomize(rand, -1.0, 1.0);
                 birds[i] = (new Bird(net, new Vector2(100, 100), pixel, Color.Yellow, birdPosition, birdHitbox));
             }
 
