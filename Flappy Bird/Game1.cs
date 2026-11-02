@@ -40,6 +40,7 @@ namespace Flappy_Bird
         ErrorFunction errorFunction;
 
         Bird[] birds;
+        const int PopulationSize = 20;
 
         NeuralNetwork network;
         public Game1()
@@ -90,7 +91,7 @@ namespace Flappy_Bird
 
             obstacles.Add(new Obstacle(topPipe, bottomPipe));
 
-            birds = new Bird[200];
+            birds = new Bird[PopulationSize];
             for (int i = 0; i < birds.Length; i++)
             {
                 NeuralNetwork net = new NeuralNetwork(activationFunction, errorFunction, neuronsPerLayer);
@@ -164,7 +165,7 @@ namespace Flappy_Bird
             if (restart)
             {
                 bestFitness = birds.Max(bird => bird.fitness);
-                geneticLearning.TrainGeneticLearning(birds, rand, 0.002);
+                geneticLearning.TrainGeneticLearning(birds, rand, 0.02);
                 generation++;
                 for (int i = 0; i < birds.Length; i++)
                 {

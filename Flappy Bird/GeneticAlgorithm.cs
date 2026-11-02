@@ -50,32 +50,26 @@ namespace Flappy_Bird
                 }
             }
         }
-        public void Crossover(NeuralNetwork winner, NeuralNetwork loser, Random random)
+        public void Crossover(NeuralNetwork firstParent, NeuralNetwork secondParent, NeuralNetwork child, Random random)
         {
-            for (int i = 1; i < winner.layers.Length; i++)
+            for (int i = 1; i < firstParent.layers.Length; i++)
             {
-                //References to the Layers
-                Layer winLayer = winner.layers[i];
-                Layer childLayer = loser.layers[i];
+                Layer firstLayer = firstParent.layers[i];
+                Layer secondLayer = secondParent.layers[i];
+                Layer childLayer = child.layers[i];
 
-                int cutPoint = random.Next(winLayer.Neurons.Length); //calculate a cut point for the layer
-                bool flip = random.Next(2) == 0; //randomly decide which side of the cut point will come from winner
-
-                //Either copy from 0->cutPoint or cutPoint->Neurons.Length from the winner based on the flip variable
-                for (int j = (flip ? 0 : cutPoint); j < (flip ? cutPoint : winLayer.Neurons.Length); j++)
+                for (int j = 0; j < firstLayer.Neurons.Length; j++)
                 {
-                    //References to the Neurons
-                    Neuron winNeuron = winLayer.Neurons[j];
+                    Neuron firstNeuron = firstLayer.Neurons[j];
+                    Neuron secondNeuron = secondLayer.Neurons[j];
                     Neuron childNeuron = childLayer.Neurons[j];
 
-                    //Copy the winners Weights and Bias into the loser/child neuron
-                    //winNeuron.dendrites.CopyTo(childNeuron.dendrites, 0);
-                    //IS it OK to just COPY the Dentrites
-
-                    childNeuron.bias = winNeuron.bias;
-                    for (int d = 0; d < winNeuron.dendrites.Length; d++)
+                    childNeuron.bias = random.Next(2) == 0 ? firstNeuron.bias : secondNeuron.bias;
+                    for (int d = 0; d < firstNeuron.dendrites.Length; d++)
                     {
-                        childNeuron.dendrites[d].Weight = winNeuron.dendrites[d].Weight;
+                        childNeuron.dendrites[d].Weight = random.Next(2) == 0
+                            ? firstNeuron.dendrites[d].Weight
+                            : secondNeuron.dendrites[d].Weight;
                     }
                 }
             }
@@ -84,20 +78,17 @@ namespace Flappy_Bird
         public void TrainGeneticLearning(Bird[] birds, Random random, double mutationRate)
         {
             Array.Sort(birds, (a, b) => b.fitness.CompareTo(a.fitness));
-            int start = (int)(birds.Length * 0.1);
-            int end = (int)(birds.Length * 0.9);
+            int eliteCount = Math.Max(2, (int)(birds.Length * 0.1));
 
-            //Keep the top 10%, make children for the middle 80%, and replace the bottom 10%.
-            for (int i = start; i < end; i++)
+            //Keep the elites, then make every other bird from two distinct elite parents.
+            for (int i = eliteCount; i < birds.Length; i++)
             {
-                Crossover(birds[random.Next(start)].brain, birds[i].brain, random);
+                int firstParentIndex = random.Next(eliteCount);
+                int secondParentIndex = random.Next(eliteCount - 1);
+                if (secondParentIndex >= firstParentIndex) secondParentIndex++;
+
+                Crossover(birds[firstParentIndex].brain, birds[secondParentIndex].brain, birds[i].brain, random);
                 Mutate(birds[i].brain, random, mutationRate);
-            }
-
-            //Removes the worst performing networks
-            for (int i = end; i < birds.Length; i++)
-            {
-                birds[i].brain.Randomize(random, -1.0, 1.0);
             }
         }
 
