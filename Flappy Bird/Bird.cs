@@ -18,7 +18,7 @@ namespace Flappy_Bird
         const float gravity = 0.7f;
         bool isJumping = false;
         public NeuralNetwork brain;
-        int fitness;
+        public int fitness;
         public bool isDead;
 
         public Bird(NeuralNetwork brain, Vector2 speed, Texture2D image, Color tint, Vector2 position, Rectangle hitbox)
@@ -36,6 +36,7 @@ namespace Flappy_Bird
         {
             if (isDead == false)
             {
+                fitness++;
 
 
                 hitbox.Y += 3;
@@ -73,6 +74,13 @@ namespace Flappy_Bird
                 }
             }
             ///hitbox = new Rectangle((int)position.X, (int)position.Y, hitbox.Width, hitbox.Height);
+        }
+
+        public void Reset(Rectangle startHitbox)
+        {
+            hitbox = startHitbox;
+            fitness = 0;
+            isDead = false;
         }
 
         public bool Collision(List<Obstacle> obstacles)

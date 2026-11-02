@@ -17,6 +17,12 @@ These are the recordings already included in this repository. They are historica
 - `GeneticAlgorithm.cs` implements neuron-level crossover, weight/bias mutation, and reinitialization.
 - MonoGame handles rendering, obstacle movement, and collisions. The graphics are drawn from a one-pixel texture rather than a sprite pack.
 
+## Evolution loop
+
+Each bird receives one fitness point for every update it survives. When all 200 birds have died, the population is sorted by that survival score: the top 10% remain, the middle 80% receive crossover and mutation from a top performer, and the bottom 10% are reinitialized. The next generation then starts from the same initial obstacle setup.
+
+The window title shows the current generation, the best survival score from the completed generation, and the current score. This makes it possible to inspect each generation without changing the network or obstacle model.
+
 ```mermaid
 flowchart LR
   A[Distances to next pipe] --> B[2-input neural network]
@@ -40,9 +46,9 @@ The simulation starts automatically. Press **Escape** to exit.
 
 ## Current limitations
 
-This is an early learning project. The current trainer runs every update and sorts birds by `position.X`; that value is not advanced during play. That selection rule needs work before I can treat the implementation as a reliable generation-based optimizer. I have not added reproducible seeds, saved models, or a benchmark suite.
+This is an early learning project. It does not yet use reproducible seeds, saved models, or a benchmark suite. Fitness measures survival updates within this simulation, so a high score is not a general machine-learning result.
 
-The Release build passed during a local macOS check. A graphical run was started and stopped, but its window was not verified, so this does not establish that the demo runs correctly on macOS.
+The Debug build passed during a local macOS check. A graphical run started locally; a new recording will be added only after a sustained run is captured and reviewed.
 
 ## Code guide
 

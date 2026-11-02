@@ -25,6 +25,8 @@ namespace Flappy_Bird
         TimeSpan timespan;
         bool restart = false;
         int score;
+        int generation = 1;
+        int bestFitness;
         GeneticAlgorithm geneticLearning;
 
         int[] neuronsPerLayer;
@@ -113,7 +115,7 @@ namespace Flappy_Bird
                 Exit();
             //if (Lose == false)
             //{
-            this.Window.Title = $"{Mouse.GetState().Position}                    {score}";
+            this.Window.Title = $"Generation {generation} | Best survival {bestFitness} | Score {score}";
             timespan += gameTime.ElapsedGameTime;
 
             for (int i = 0; i < obstacles.Count; i++)
@@ -138,9 +140,6 @@ namespace Flappy_Bird
                 }
             }
 
-            geneticLearning.TrainGeneticLearning(birds, new Random(), 0.002);
-            
-            
             for (int i = 0; i < birds.Length; i++)
             {
                 if (birds[i].Collision(obstacles))
@@ -164,10 +163,12 @@ namespace Flappy_Bird
 
             if (restart)
             {
+                bestFitness = birds.Max(bird => bird.fitness);
+                geneticLearning.TrainGeneticLearning(birds, rand, 0.002);
+                generation++;
                 for (int i = 0; i < birds.Length; i++)
                 {
-                    birds[i].hitbox = new Rectangle((int)birdPosition.X, (int)birdPosition.Y, 50, 50);
-                    birds[i].isDead = false;
+                    birds[i].Reset(new Rectangle((int)birdPosition.X, (int)birdPosition.Y, 50, 50));
                 }
                 restart = false;
                 obstacles.Clear();

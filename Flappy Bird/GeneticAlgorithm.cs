@@ -83,12 +83,11 @@ namespace Flappy_Bird
 
         public void TrainGeneticLearning(Bird[] birds, Random random, double mutationRate)
         {
-            Array.Sort(birds, (a, b) => a.position.X.CompareTo(b.position.X));
-            //population =  population.OrderByDescending((p) => p.fitness).ToArray();
+            Array.Sort(birds, (a, b) => b.fitness.CompareTo(a.fitness));
             int start = (int)(birds.Length * 0.1);
             int end = (int)(birds.Length * 0.9);
 
-            //Notice that this process is only called on networks in the middle 80% of the array
+            //Keep the top 10%, make children for the middle 80%, and replace the bottom 10%.
             for (int i = start; i < end; i++)
             {
                 Crossover(birds[random.Next(start)].brain, birds[i].brain, random);
