@@ -14,20 +14,12 @@ The GIF was captured from the game's back buffer with no external recorder. To m
 FLAPPY_CAPTURE_DIR=/tmp/flappy-capture dotnet run --project "Flappy Bird/Flappy Bird.csproj" -c Release
 ```
 
-## Historical recordings
-
-https://github.com/user-attachments/assets/41f2ebf1-8cd5-4da5-b441-255af583a9ff
-
-https://github.com/user-attachments/assets/570e88b6-70c0-4a76-96ff-d5079147f44f
-
-These are the recordings already included in this repository. They are historical demos and do not reflect the current generation loop or the 20-bird population.
-
 ## Inside the project
 
 - Each bird receives two inputs: horizontal distance to the next pipe and vertical distance to its gap.
 - Pipes move at 5 pixels per update and leave a 120-pixel gap, making the controller face a tighter, faster course.
 - A **2 → 4 → 1** network uses `tanh` activations. An output above `0.8` triggers a jump.
-- `GeneticAlgorithm.cs` implements neuron-level crossover, weight/bias mutation, and reinitialization.
+- `GeneticAlgorithm.cs` implements elite copying and weight/bias mutation.
 - MonoGame handles rendering, obstacle movement, and collisions. The graphics are drawn from a one-pixel texture rather than a sprite pack.
 
 ## Evolution loop
