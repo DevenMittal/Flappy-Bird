@@ -40,7 +40,13 @@ namespace Flappy_Bird
         ErrorFunction errorFunction;
 
         Bird[] birds;
-        const int PopulationSize = 5;
+        const int PopulationSize = 10;
+        const int PipeGapHeight = 120;
+        const int PipeSpeed = 5;
+        const int CaptureMaxFrames = 150;
+        string captureDirectory;
+        int captureTick;
+        int capturedFrames;
 
         NeuralNetwork network;
         public Game1()
@@ -55,6 +61,12 @@ namespace Flappy_Bird
             //hi
             // TODO: Add your initialization logic here
             rand = new Random();
+            captureDirectory = Environment.GetEnvironmentVariable("FLAPPY_CAPTURE_DIR");
+            if (!string.IsNullOrWhiteSpace(captureDirectory))
+            {
+                Directory.CreateDirectory(captureDirectory);
+                File.WriteAllText(Path.Combine(captureDirectory, "stats.csv"), "frame,generation,best_survival,score\n");
+            }
             timespan = new TimeSpan();
             score = 0;
 
@@ -85,7 +97,7 @@ namespace Flappy_Bird
             int pastX = 800/*(int)obstacles[obstacles.Count-1].Bottom.position.X + 100*/;
 
             Rectangle pipeRectangle1 = new Rectangle(pastX, rand.Next(-150, 0), 50, 250);
-            Rectangle pipeRectangle2 = new Rectangle(pastX, pipeRectangle1.Y + pipeRectangle1.Height + 200, 50, 300);
+            Rectangle pipeRectangle2 = new Rectangle(pastX, pipeRectangle1.Y + pipeRectangle1.Height + PipeGapHeight, 50, 300);
             Pipe topPipe = new Pipe(pixel, pipeRectangle1, Color.Green);
             Pipe bottomPipe = new Pipe(pixel, pipeRectangle2, Color.Green);
 
@@ -133,7 +145,7 @@ namespace Flappy_Bird
                 {
                     int pastX = 800/*(int)obstacles[obstacles.Count-1].Bottom.position.X + 100*/;
                     Rectangle pipeRectangle1 = new Rectangle(pastX, rand.Next(-150, 0), 50, 250);
-                    Rectangle pipeRectangle2 = new Rectangle(pastX, pipeRectangle1.Y + pipeRectangle1.Height + 200, 50, 300);
+                    Rectangle pipeRectangle2 = new Rectangle(pastX, pipeRectangle1.Y + pipeRectangle1.Height + PipeGapHeight, 50, 300);
                     Pipe topPipe = new Pipe(pixel, pipeRectangle1, Color.Green);
                     Pipe bottomPipe = new Pipe(pixel, pipeRectangle2, Color.Green);
 
@@ -178,7 +190,7 @@ namespace Flappy_Bird
                 int pastX = 800/*(int)obstacles[obstacles.Count-1].Bottom.position.X + 100*/;
 
                 Rectangle pipeRectangle1 = new Rectangle(pastX, rand.Next(-150, 0), 50, 250);
-                Rectangle pipeRectangle2 = new Rectangle(pastX, pipeRectangle1.Y + pipeRectangle1.Height + 200, 50, 300);
+                Rectangle pipeRectangle2 = new Rectangle(pastX, pipeRectangle1.Y + pipeRectangle1.Height + PipeGapHeight, 50, 300);
                 Pipe topPipe = new Pipe(pixel, pipeRectangle1, Color.Green);
                 Pipe bottomPipe = new Pipe(pixel, pipeRectangle2, Color.Green);
 
@@ -211,7 +223,32 @@ namespace Flappy_Bird
             }
             spriteBatch.End();
 
+            CaptureFrame();
+
             base.Draw(gameTime);
+        }
+
+        private void CaptureFrame()
+        {
+            if (string.IsNullOrWhiteSpace(captureDirectory) || capturedFrames >= CaptureMaxFrames || captureTick++ % 6 != 0)
+                return;
+
+            int width = GraphicsDevice.PresentationParameters.BackBufferWidth;
+            int height = GraphicsDevice.PresentationParameters.BackBufferHeight;
+            Color[] pixels = new Color[width * height];
+            GraphicsDevice.GetBackBufferData(pixels);
+
+            string framePath = Path.Combine(captureDirectory, $"frame-{capturedFrames:000}.png");
+            using (Texture2D frame = new Texture2D(GraphicsDevice, width, height))
+            {
+                frame.SetData(pixels);
+                using FileStream output = File.Create(framePath);
+                frame.SaveAsPng(output, width, height);
+            }
+
+            File.AppendAllText(Path.Combine(captureDirectory, "stats.csv"),
+                $"{capturedFrames},{generation},{bestFitness},{score}\n");
+            capturedFrames++;
         }
     }
 }

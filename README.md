@@ -1,10 +1,18 @@
 # Flappy Bird AI
 
-I built a Flappy Bird simulation in C# with a small neural network for each bird and a genetic-learning experiment. The game renders 5 birds at once, so I can watch their decisions against the same moving obstacles.
+I built a Flappy Bird simulation in C# with a small neural network for each bird and a genetic-learning experiment. The game renders 10 birds at once, so I can watch their decisions against the same moving obstacles.
 
 ## Current recording
 
-A new recording still needs to be captured from the revised generation loop. It will begin at visible generation 1 and show the evolution metrics in the window title.
+![Flappy Bird hard-mode evolution recording](docs/flappy-hard-mode.gif)
+
+This recording uses 10 birds, a 120-pixel pipe gap, and pipe speed 5. The farthest bird is preserved each generation and the other nine are copied and mutated from it. Across 150 captured frames, the run reached generation 7 and a best survival score of 261 updates. The raw frame-level measurements are in [flappy-hard-mode-stats.csv](docs/flappy-hard-mode-stats.csv).
+
+The GIF was captured from the game's back buffer with no external recorder. To make another bounded capture, set `FLAPPY_CAPTURE_DIR` before running:
+
+```sh
+FLAPPY_CAPTURE_DIR=/tmp/flappy-capture dotnet run --project "Flappy Bird/Flappy Bird.csproj" -c Release
+```
 
 ## Historical recordings
 
@@ -17,13 +25,14 @@ These are the recordings already included in this repository. They are historica
 ## Inside the project
 
 - Each bird receives two inputs: horizontal distance to the next pipe and vertical distance to its gap.
+- Pipes move at 5 pixels per update and leave a 120-pixel gap, making the controller face a tighter, faster course.
 - A **2 → 4 → 1** network uses `tanh` activations. An output above `0.8` triggers a jump.
 - `GeneticAlgorithm.cs` implements neuron-level crossover, weight/bias mutation, and reinitialization.
 - MonoGame handles rendering, obstacle movement, and collisions. The graphics are drawn from a one-pixel texture rather than a sprite pack.
 
 ## Evolution loop
 
-Each bird receives one fitness point for every update it survives. When all 5 birds have died, the population is sorted by that survival score. The farthest bird remains. Every other bird receives a weight-by-weight copy from that elite network and then uses the existing mutation operation. The next generation starts from the same initial obstacle setup.
+Each bird receives one fitness point for every update it survives. When all 10 birds have died, the population is sorted by that survival score. The farthest bird remains. Every other bird receives a weight-by-weight copy from that elite network and then uses the existing mutation operation. The next generation starts from the same initial obstacle setup.
 
 The initial population is randomized through one shared generator, so every bird receives a distinct initial network. The window title shows the current generation, the best survival score from the completed generation, and the current score. This makes it possible to inspect the elite's progress without changing the network or obstacle model.
 

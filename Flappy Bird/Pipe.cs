@@ -30,7 +30,7 @@ namespace Flappy_Bird
 
         public void Update()
         { 
-            hitbox.X -= 4;
+            hitbox.X -= 5;
         }
 
 
